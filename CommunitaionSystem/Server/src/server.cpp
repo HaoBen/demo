@@ -1,4 +1,6 @@
 #include "server.h"
+#include <cstdio>
+#include <cerrno>
 
 map<int,User>* Server::users = new map<int,User>();
 int Server::m_sock = -1;
