@@ -7,11 +7,16 @@ Server
 |
 |---include  (to store head files)
 |
-|---obj  (to store obj files)
-|
 |---bin  (to store executable files)
 |
 |---.vscode (to store configuration files for vscode)
 |
-|---makefile  (to make)
+|---build (cmake build directory)
+|
+|---CMakeLists.txt (the configuration used for cmake)
 ```
+
+**Build Process:**
+1. cd build/
+2. cmake ..
+3. make
