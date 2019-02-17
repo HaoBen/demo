@@ -13,3 +13,4 @@ aux_source_directory(src DIR_SRCS)
 add_executable(${PROJECT_NAME} ${DIR_SRCS})
 
 # 添加可执行文件所需要的库
+#target_link_libraries(${PROJECT_NAME})

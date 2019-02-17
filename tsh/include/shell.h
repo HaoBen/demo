@@ -38,6 +38,8 @@ public:
      * @return */
     void setEnv(std::string name,std::string value);
 
+    std::string parseInput(std::string input);
+
     /* 测试函数 */
     static void testShell();
 };

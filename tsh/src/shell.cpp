@@ -34,12 +34,28 @@ void Shell::setEnv(std::string name, std::string value) {
     }
 }
 
-void Shell::testShell()  {
+string Shell::parseInput(string input) {
+    string res;
+    if(!input.empty()) {
+        /* 解释并执行过程 */
+    }
+    res.append("tsh> ");
+    return res;
+}
+
+void Shell::testShell() {
     Shell shell;
 //    for (map<string,string>::iterator it = shell.env.begin(); it != shell.env.end(); ++it) {
 //        cout<<it->first<<"-->"<<it->second<<endl;
 //    }
-    cout<<shell.getEnv("PATH")<<endl;
-    shell.setEnv("PATH","TEST");
-    cout<<shell.getEnv("PATH")<<endl;
+//    cout<<shell.getEnv("PATH")<<endl;
+//    shell.setEnv("PATH","TEST");
+//    cout<<shell.getEnv("PATH")<<endl;
+    string buf;
+    cout<<"tsh> ";
+    while(1) {
+        cin>>buf;
+        buf = shell.parseInput(buf);
+        cout<<buf;
+    }
 }
