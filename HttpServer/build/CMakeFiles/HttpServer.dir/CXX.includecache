@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/server.h
+
+../include/system.h
+unistd.h
+-
+sys/types.h
+-
+sys/socket.h
+-
+netinet/in.h
+-
+arpa/inet.h
+-
+
+/home/dinghao/workspace/demo/HttpServer/src/main.cpp
+server.h
+/home/dinghao/workspace/demo/HttpServer/src/server.h
+
+/home/dinghao/workspace/demo/HttpServer/src/server.cpp
+system.h
+/home/dinghao/workspace/demo/HttpServer/src/system.h
+server.h
+/home/dinghao/workspace/demo/HttpServer/src/server.h
+iostream
+-
+string
+-
+vector
+-
+
+/home/dinghao/workspace/demo/HttpServer/src/system.cpp
+system.h
+/home/dinghao/workspace/demo/HttpServer/src/system.h
+iostream
+-
+cstring
+-
+

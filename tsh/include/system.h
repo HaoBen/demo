@@ -19,6 +19,13 @@ public:
      */
     std::vector<std::string> environments();
 
+    /* 查找某个文件在给定的目录下是否存在,若存在则返回全路径,否则返回空
+     * @param name 待查文件
+     * @param Path 允许存在的路径
+     * @return 全路径
+     */
+    std::string getFullPath(std::string name,std::string Path);
+
     /*HELLO WORLD*/
     void hello() {
         printf("Hello,World\n");

@@ -1,5 +1,7 @@
 #include "shell.h"
+#include "utils.h"
 #include <iostream>
+#include <cstring>
 
 using namespace std;
 
@@ -34,13 +36,23 @@ void Shell::setEnv(std::string name, std::string value) {
     }
 }
 
-string Shell::parseInput(string input) {
-    string res;
+void Shell::parseInput(string input) {
+    vector<string> args;
     if(!input.empty()) {
         /* 解释并执行过程 */
+        args = Utils::splitString(input," ");
+        if(args[0] == "exit") {
+            exit(0);
+        } else if(args[0] == "ls") {
+            cout<<sys->getFullPath(args[0],getEnv("PATH"))<<endl;
+        } else if(args[0] == "./test") {
+            FILE *test = fopen(args[0].c_str(),"r");
+            if(test) {
+                cout<<"OK!"<<endl;
+                fclose(test);
+            }
+        }
     }
-    res.append("tsh> ");
-    return res;
 }
 
 void Shell::testShell() {
@@ -52,10 +64,9 @@ void Shell::testShell() {
 //    shell.setEnv("PATH","TEST");
 //    cout<<shell.getEnv("PATH")<<endl;
     string buf;
-    cout<<"tsh> ";
     while(1) {
-        cin>>buf;
-        buf = shell.parseInput(buf);
-        cout<<buf;
+        cout<<"tsh> ";
+        getline(cin,buf);
+        shell.parseInput(buf);
     }
 }

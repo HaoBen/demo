@@ -18,10 +18,14 @@ private:
     std::map<std::string,std::string> env;
     System *sys;
 private:
+    /* 一些工具函数,只能Shell类自己调用 */
 
 public:
     /* 构造函数 */
     Shell();
+    /* 析构函数 */
+    ~Shell() {
+    }
 
     /* shell程序入口 */
     void start();
@@ -38,7 +42,7 @@ public:
      * @return */
     void setEnv(std::string name,std::string value);
 
-    std::string parseInput(std::string input);
+    void parseInput(std::string input);
 
     /* 测试函数 */
     static void testShell();
