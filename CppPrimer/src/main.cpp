@@ -5,6 +5,7 @@
 #include "_7.h"
 #include "_8.h"
 #include "_9.h"
+#include "sort.h"
 
 using namespace std;
 
@@ -21,4 +22,7 @@ int main()
 //    _8_6();
 
 //    _9_4();
+    vector<int> a = {1,2,3,4,5};
+    heapSort(a);
+    int b = 3;
 }

@@ -10,6 +10,6 @@ include_directories(include)
 aux_source_directory(src DIR_SRCS)
 
 # 生成可执行文件
-add_executable(bin/${PROJECT_NAME} ${DIR_SRCS})
+add_executable(${PROJECT_NAME} ${DIR_SRCS})
 
 # 添加可执行文件所需要的库
