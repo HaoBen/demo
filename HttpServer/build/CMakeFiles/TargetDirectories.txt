@@ -1,3 +1,0 @@
-/home/dinghao/workspace/demo/HttpServer/build/CMakeFiles/rebuild_cache.dir
-/home/dinghao/workspace/demo/HttpServer/build/CMakeFiles/HttpServer.dir
-/home/dinghao/workspace/demo/HttpServer/build/CMakeFiles/edit_cache.dir

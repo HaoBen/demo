@@ -72,6 +72,15 @@ long System::read_fd(int fd,void *buf,size_t nb) {
     return rbs;
 }
 
+long System::write_fd(int fd,const void *buf,size_t count) {
+    long rbs = write(fd,buf,count);
+    if(rbs == -1) {
+        perror("write error: ");
+        return -1;
+    }
+    return rbs;
+}
+
 int System::close_fd(int _fd) {
     int flag = close(_fd);
     if(flag != 0) {

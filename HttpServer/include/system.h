@@ -34,10 +34,21 @@ public:
      */
     int accept_fd(int _listenfd,struct sockaddr_in *clientaddr);
 
-    /* 读取文件描述符fd对应设备中的内容
+    /* 读取文件描述符fd对应文件中的内容
      * @param fd 待读取设备的文件描述符
+     * @param buf 存放读取内容的缓冲区
+     * @param nb 能够读取的最大字节数
+     * @return 真正读取的字节数,非负成功
      */
     long read_fd(int fd,void *buf,size_t nb);
+
+    /* 向文件描述符fd对应文件中写入内容
+     * @param fd 待写入文件的文件描述符
+     * @param buf 存放待写内容的缓冲区
+     * @param count 能够写入的最大长度
+     * @return 真正写入的字节数,非负成功
+     */
+    ssize_t write_fd(int fd,const void *buf,size_t count);
 
     /* 关闭打开的文件描述符
      * @param _fd 需要关闭的文件描述符
