@@ -94,3 +94,14 @@ unsigned int System::Sleep(unsigned int secs) {
     unsigned int left = sleep(secs);
     return left;
 }
+
+string System::getGMTime()
+{
+    struct tm gmt;
+    time_t timep;
+    timep = time(nullptr);
+    gmtime_r(&timep,&gmt);
+    char buf[128];
+    asctime_r(&gmt,buf);
+    return string(buf);
+}

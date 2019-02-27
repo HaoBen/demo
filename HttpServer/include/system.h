@@ -2,10 +2,12 @@
 #define SYSTEM_H
 
 #include <unistd.h>
+#include <ctime>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string>
 
 /* 封装的System类,与系统交互 */
 class System {
@@ -62,6 +64,10 @@ public:
      */
     unsigned int Sleep(unsigned int secs);
 
+    /* 获取当前的格林尼治时间
+     * @return 字符串形式的GMT
+     */
+    std::string getGMTime();
 };
 
 #endif // SYSTEM_H
