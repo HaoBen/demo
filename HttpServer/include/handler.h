@@ -1,7 +1,6 @@
 #ifndef HANDLER_H
 #define HANDLER_H
 
-#include <map>
 #include <string>
 
 class HttpRequest;
@@ -16,9 +15,9 @@ protected:
 public:
     virtual ~Handler() {}
 
-    virtual void doGet(HttpRequest& request, HttpResponse& response) = 0;
+    virtual void doGet(HttpRequest& request, HttpResponse& response);
 
-    virtual void doPost(HttpRequest& request, HttpResponse& response) = 0;
+    virtual void doPost(HttpRequest& request, HttpResponse& response);
 };
 /* 默认的Handler,用于处理静态资源的请求 */
 class StaticHandler : public Handler {
@@ -27,7 +26,6 @@ public:
     ~StaticHandler() {}
 
     virtual void doGet(HttpRequest& request, HttpResponse& response);
-    virtual void doPost(HttpRequest& request, HttpResponse& response);
 };
 /* cgi请求的handler,用于处理cgi请求 */
 class CgiHandler : public Handler {
@@ -35,8 +33,7 @@ public:
     CgiHandler() {}
     ~CgiHandler() {}
 
-    virtual void doGet(HttpRequest& request, HttpResponse& response);
-    virtual void doPost(HttpRequest& request, HttpResponse& response);
+    virtual void doGet(HttpRequest& request,HttpResponse& response);
 };
 
 
