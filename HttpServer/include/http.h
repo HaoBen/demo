@@ -30,7 +30,7 @@ public:
     const std::string & getRequestVersion() { return requestVersion; }
     const std::string & getRequestUrl() { return requestUrl; }
     const std::map<std::string,std::string> & getRequestHeaders() { return requestHeaders; }
-    const std::map<std::string,std::string> & getRequestParams() { return requestParams; }
+    std::map<std::string,std::string> & getRequestParams() { return requestParams; }
     const Server* getServerContext() { return serverContext; }
 };
 

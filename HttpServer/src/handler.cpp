@@ -1,6 +1,7 @@
 #include "handler.h"
 #include "http.h"
 #include "system.h"
+#include "utils.h"
 #include <map>
 #include <fstream>
 #include <sstream>
@@ -46,22 +47,27 @@ void StaticHandler::doGet(HttpRequest &request, HttpResponse &response)
     }
 }
 
+static char* argcopy(const string& input) {
+    size_t len = input.size();
+    char * res = new char[len];
+    for(size_t i = 0;i < len;++i) {
+        res[i] = input[i];
+    }
+    res[len] = 0;
+    return res;
+}
 void CgiHandler::doGet(HttpRequest &request, HttpResponse &response)
 {
     /* 根据URL和家目录信息,构造出本次请求资源在计算机上的绝对目录 */
     string filename = request.getServerContext()->getHomeDir();
     filename.append(request.getRequestUrl());
 
-    /* 尝试打开请求资源 */
-    int fd = open(filename.c_str(),O_RDONLY);
-    if(fd < 0) {
-        response.setResponseCode(404);
+    /* 检查一下请求资源的信息 */
+    if(access(filename.c_str(),X_OK) == -1) {
+        response.setResponseCode(500);
         perror("ERROR: ");
         return;
-    } else {
-        close(fd);
     }
-
 
     /* 创建管道,[0]是用来读的,[1]是用来写的
      * 注意::::创建管道一定要在fork子进程之前,否则父子进程中创建出的管道是完全不同的
@@ -84,11 +90,28 @@ void CgiHandler::doGet(HttpRequest &request, HttpResponse &response)
         close(pipefd[0]);
         if(dup2(pipefd[1],STDOUT_FILENO) == -1) {
             perror("ERROR: ");
-            exit(1);
+            exit(EXIT_FAILURE);
         }
 
+        /* 判断可执行文件类型,脚本还是二进制文件 */
+        string cmd;
+        if(Utils::endWith(filename,".sh")) {
+            cmd = "/bin/bash";
+        } else if(Utils::endWith(filename,".py")) {
+            cmd = "/bin/python";
+        }
+        size_t tmp = 0;
+        char *argv[4];
+        if(cmd.empty()) {
+            argv[tmp++] = argcopy(filename);
+            cmd = filename;
+        } else {
+            argv[tmp++] = argcopy(cmd);
+            argv[tmp++] = argcopy(filename);
+        }
+        argv[tmp] = nullptr;
         /* 构造cgi程序的命令行参数,并执行cgi程序 */
-        if(execv(filename.c_str(),nullptr) == -1) {
+        if(execv(cmd.c_str(),argv) == -1) {
             perror("ERROR: ");
             close(pipefd[1]);
             exit(EXIT_FAILURE);
@@ -109,7 +132,11 @@ void CgiHandler::doGet(HttpRequest &request, HttpResponse &response)
         }
 
         /* 设置响应主体并关闭读管道 */
-        response.setResponseBody(buffer.str());
+        if(buffer.str().empty()) {
+            response.setResponseCode(500);
+        } else {
+            response.setResponseBody(buffer.str());
+        }
         System::getSystemHandler()->close_fd(pipefd[0]);
     }
 }
@@ -137,11 +164,12 @@ Handler *HandlerFactory::getHandler(string URL)
     }
     string::size_type tmp;
     string suffix;
-    static string staticSourceFlag = "js html khtml css jpg png ico";
+    static string staticSourceFlag = ".js .html .khtml .css .jpg .png .ico";
     tmp = URL.find_last_of(".");
     if(tmp != URL.npos) {
+        suffix = URL.substr(tmp);
         tmp = staticSourceFlag.find(suffix);
-        if(tmp != staticSourceFlag.size()) {
+        if(tmp != staticSourceFlag.npos) {
             return HandlerFactory::getStaticHandler();
         }
     }
