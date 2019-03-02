@@ -3,7 +3,9 @@
 #include "utils.h"
 #include "http.h"
 #include "handler.h"
+#include "log.h"
 #include <stdexcept>
+#include <thread>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -21,19 +23,15 @@
 /* 单个响应允许传送的最大数据量(1MB) */
 #define MAX_LEN_PER_RES 1048576
 
-/* 字符颜色代码 */
-#define RESET   "\033[0m"
-#define RED     "\033[31m"      /* Red */
-#define GREEN   "\033[32m"      /* Green */
-
 using namespace std;
 
 /*----------------------------Server类----------start----------------------------------*/
-
+System* Server::sys = nullptr;
 /* 初始化服务器 */
 Server::Server(int argc,char *argv[]) {
     /*　获取与系统交互的工具　*/
-    sys = System::getSystemHandler();
+    if(!sys)
+        sys = System::getSystemHandler();
 
     /* 默认监听端口80 */
     port = DEFAULT_PORT;
@@ -57,7 +55,9 @@ Server::Server(int argc,char *argv[]) {
     /* 获取监听port端口的socket描述符 */
     listenfd = sys->open_listenfd(port,MAX_REQUEST_WAIT);
 
-    cout<<"服务器初始化完毕,正在监听端口 : "<<port<<endl;
+    stringstream ss;
+    ss<<"服务器初始化完毕,正在监听端口"<<port;
+    Log::printLog(ss.str());
 }
 
 /* 析构函数,清理无用资源 */
@@ -78,35 +78,30 @@ void Server::startup() {
     while(1) {
         connfd = sys->accept_fd(listenfd,&clientaddr);
         if(connfd < 0) {
-            cout<<RED<<"Log: 第 "<<++accept_lost_times<<" 次请求丢失!"<<RESET<<endl;
+            stringstream ss;
+            ss<<"第 "<<++accept_lost_times<<" 次请求丢失!";
+            Log::printWarn(ss.str());
         } else {
-            cout<<GREEN<<"Log: 成功接收来自 |"<<
-                  inet_ntoa(clientaddr.sin_addr)<<
-                   ":"<<
-                   ntohs(clientaddr.sin_port)<<
-                   "| 的请求"<<RESET<<endl;
-            handleReq(connfd);
-            sys->close_fd(connfd);
+            stringstream ss;
+            ss<<"成功接收来自 |"<<inet_ntoa(clientaddr.sin_addr)<<":"<<ntohs(clientaddr.sin_port)<<"| 的请求";
+            Log::printLog(ss.str());
+            /* 创建一个新的线程处理请求 */
+            thread handle_thread(handleReq,connfd,this);
+            handle_thread.detach();
         }
     }
 }
 
-string Server::getHomeDir() const
-{
-    return this->home_dir;
-}
-
 /* 处理HTTP请求 */
-void Server::handleReq(int clientfd) {
+void Server::handleReq(int clientfd,Server* context) {
     /* 将HTTP请求信息读到缓冲区 */
     char buf[MAX_LEN_PER_REQ];
     long rbs = sys->read_fd(clientfd,static_cast<void*>(buf),MAX_LEN_PER_REQ);
     if(rbs <= 0) return;
     buf[rbs-1] = 0;
-    cout<<buf<<endl;
 
     /* 生成请求对象 */
-    HttpRequest httpReq(buf,this);
+    HttpRequest httpReq(buf,context);
     /* 生成响应对象 */
     HttpResponse httpRes;
 
@@ -118,6 +113,7 @@ void Server::handleReq(int clientfd) {
     /* 将响应发回浏览器端 */
     string res = httpRes.toString();
     sys->write_fd(clientfd,res.c_str(),res.size());
+    sys->close_fd(clientfd);
 }
 
 /* 测试函数 */

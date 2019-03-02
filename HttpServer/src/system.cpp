@@ -21,13 +21,13 @@ int System::open_listenfd(int port,int r_limit) {
 
     /* 创建一个socket描述符 */
     if((listenfd = socket(AF_INET,SOCK_STREAM,0)) < 0) {
-        perror("create socket error");
+        Log::printError(strerror(errno));
         exit(1);
     }
 
     /* 消除绑定时的 "Address already in use" 错误 */
     if(setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,static_cast<const void *>(&optval), sizeof(int)) < 0) {
-        perror("set socket option error");
+        Log::printError(strerror(errno));
         exit(1);
     }
 
@@ -40,13 +40,13 @@ int System::open_listenfd(int port,int r_limit) {
     serveraddr.sin_port = htons(static_cast<unsigned short>(port));
     /* 绑定socket描述符到该地址 */
     if(bind(listenfd,reinterpret_cast<const struct sockaddr *>(&serveraddr),sizeof(serveraddr)) < 0) {
-        perror("bind socket error");
+        Log::printError(strerror(errno));
         exit(1);
     }
 
     /* 开始监听打开的socket */
     if(listen(listenfd,r_limit) < 0) {
-        perror("listen error");
+        Log::printError(strerror(errno));
         exit(1);
     }
 
@@ -58,7 +58,7 @@ int System::accept_fd(int _listenfd, struct sockaddr_in *clientaddr) {
 
     int clientfd = accept(_listenfd,reinterpret_cast<struct sockaddr*>(clientaddr),&len);
     if(clientfd < 0) {
-        perror("accept error");
+        Log::printError(strerror(errno));
         return -1;
     }
     return clientfd;
@@ -67,7 +67,7 @@ int System::accept_fd(int _listenfd, struct sockaddr_in *clientaddr) {
 long System::read_fd(int fd,void *buf,size_t nb) {
     long rbs = read(fd,buf,nb);
     if(rbs == -1) {
-        perror("read error: ");
+        Log::printError(strerror(errno));
         return -1;
     }
     return rbs;
@@ -76,7 +76,7 @@ long System::read_fd(int fd,void *buf,size_t nb) {
 long System::write_fd(int fd,const void *buf,size_t count) {
     long rbs = write(fd,buf,count);
     if(rbs == -1) {
-        perror("write error: ");
+        Log::printError(strerror(errno));
         return -1;
     }
     return rbs;
@@ -85,7 +85,7 @@ long System::write_fd(int fd,const void *buf,size_t count) {
 int System::close_fd(int _fd) {
     int flag = close(_fd);
     if(flag != 0) {
-        perror("close error");
+        Log::printError(strerror(errno));
         return -1;
     }
     return flag;
@@ -104,5 +104,6 @@ string System::getGMTime()
     gmtime_r(&timep,&gmt);
     char buf[128];
     asctime_r(&gmt,buf);
+    buf[strlen(buf)-1] = 0;
     return string(buf);
 }

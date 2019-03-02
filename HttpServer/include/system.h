@@ -1,6 +1,7 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 
+#include "log.h"
 #include <unistd.h>
 #include <ctime>
 #include <sys/types.h>
@@ -10,6 +11,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <cstring>
 #include <string>
 
 /* 封装的System类,与系统交互 */

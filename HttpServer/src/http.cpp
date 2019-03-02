@@ -53,7 +53,7 @@ HttpRequest::HttpRequest(string buf, Server *context) {
             }
         }
     } catch(out_of_range err) {
-        cout<<"Log: HTTP请求解析错误("<<err.what()<<")"<<endl;
+        Log::printWarn(err.what());
     }
 }
 
@@ -68,7 +68,7 @@ HttpResponse::HttpResponse() {
 
     string date = System::getSystemHandler()->getGMTime();
     date.append(" GMT");
-    responseHeaders.insert(pair<string,string>("Date","2019.2.25"));
+    responseHeaders.insert(pair<string,string>("Date",date));
     responseHeaders.insert(pair<string,string>("Content-Type","text/html; charset=UTF-8"));
 }
 

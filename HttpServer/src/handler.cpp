@@ -76,20 +76,20 @@ void CgiHandler::doGet(HttpRequest &request, HttpResponse &response)
     int pipefd[2];
     if(pipe(pipefd) < 0) {
         response.setResponseCode(500);
-        perror("ERROR: ");
+        Log::printError(strerror(errno));
         return;
     }
     /* fork子进程执行cgi程序 */
     pid_t pid = fork();
     if(pid < 0) {
         response.setResponseCode(500);
-        perror("ERROR: ");
+        Log::printError(strerror(errno));
         return;
     } else if(pid == 0) {
         /* 子进程写管道,故关闭[0],并将其标准输出重定向到写管道 */
         close(pipefd[0]);
         if(dup2(pipefd[1],STDOUT_FILENO) == -1) {
-            perror("ERROR: ");
+            Log::printError(strerror(errno));
             exit(EXIT_FAILURE);
         }
 
@@ -112,7 +112,7 @@ void CgiHandler::doGet(HttpRequest &request, HttpResponse &response)
         argv[tmp] = nullptr;
         /* 构造cgi程序的命令行参数,并执行cgi程序 */
         if(execv(cmd.c_str(),argv) == -1) {
-            perror("ERROR: ");
+            Log::printError(strerror(errno));
             close(pipefd[1]);
             exit(EXIT_FAILURE);
         }
