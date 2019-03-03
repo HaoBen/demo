@@ -97,7 +97,11 @@ void Server::handleReq(int clientfd,Server* context) {
     /* 将HTTP请求信息读到缓冲区 */
     char buf[MAX_LEN_PER_REQ];
     long rbs = sys->read_fd(clientfd,static_cast<void*>(buf),MAX_LEN_PER_REQ);
-    if(rbs <= 0) return;
+    /* 如果请求为空,则直接关闭socket */
+    if(rbs <= 0) {
+        sys->close_fd(clientfd);
+        return;
+    }
     buf[rbs-1] = 0;
 
     /* 生成请求对象 */
