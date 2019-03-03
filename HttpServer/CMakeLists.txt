@@ -2,6 +2,7 @@ project (HttpServer)
 
 # cmake limited version
 cmake_minimum_required(VERSION 2.8)
+add_compile_options(-std=c++11)
 
 # 指定头文件目录
 include_directories(include)

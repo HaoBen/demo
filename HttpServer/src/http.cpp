@@ -38,7 +38,7 @@ HttpRequest::HttpRequest(string buf, Server *context) {
             e = (*it).find_first_of(":",s);
             name.append((*it),s,e-s);
             s = (*it).find_first_not_of(": ",e);
-            value.append((*it),s);
+            value.append((*it),s,(*it).size()-s);
             requestHeaders.insert(pair<string,string>(name,value));
         }
         /* 解析请求正文 */
