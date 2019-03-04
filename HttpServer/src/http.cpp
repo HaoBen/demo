@@ -44,7 +44,7 @@ HttpRequest::HttpRequest(string buf, Server *context) {
         /* 解析请求正文 */
         start = buf.find_first_not_of("\r\n",end);
         if(start < buf.size()) {
-            vector<string> params = Utils::splitString(buf.substr(start),"&");
+            vector<string> params = Utils::splitString(buf.substr(start,buf.size()-start),"&");
             for(vector<string>::iterator it = params.begin(); it != params.end(); ++it) {
                 vector<string> tmp = Utils::splitString((*it),"=");
                 if(tmp.size() > 2) {

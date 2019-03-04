@@ -1,8 +1,9 @@
 #include "server.h"
 #include <iostream>
-#include <fstream>
+
 using namespace std;
 
-int main() {
-    Server::testServer();
+int main(int argc,char *argv[]) {
+    Server server(argc,argv);
+    server.startup();
 }
