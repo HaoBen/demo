@@ -6,6 +6,7 @@
 #include "_8.h"
 #include "_9.h"
 #include "sort.h"
+#include "avl.h"
 
 using namespace std;
 
@@ -22,7 +23,9 @@ int main()
 //    _8_6();
 
 //    _9_4();
-    vector<int> a = {1,2,3,4,5};
-    heapSort(a);
-    int b = 3;
+    AVL<int> avl;
+    for (int i = 1;i < 15;++i) {
+        avl.insert(i);
+    }
+    int a = 12;
 }

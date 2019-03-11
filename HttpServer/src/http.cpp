@@ -104,7 +104,7 @@ void HttpResponse::setResponseCode(unsigned short code)
 
 void HttpResponse::setResponseBody(const string & body)
 {
-    responseBody.append(body);
+    responseBody.append(body,0,body.size());
     responseHeaders.insert(pair<string,string>("Content-Length",to_string(responseBody.size())));
 }
 
