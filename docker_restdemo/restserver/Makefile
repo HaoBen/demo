@@ -8,7 +8,7 @@ build: $(OBJ)
 	g++ -std=c++11 $(OBJ) $(LIBS) -o $(TARGET)
 
 .cpp.o:
-	g++ -std=c++11 -c $< $(INC) -o $@
+	g++ -std=c++11 -g -c $< $(INC) -o $@
 
 .PHONY:clean
 clean:

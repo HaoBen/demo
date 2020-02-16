@@ -1,8 +1,10 @@
-#include "../include/handler.h"
+#include "handler.h"
+
+typedef pair<utility::string_t, function<void(http_request)> > PathFuncPair;
 
 handler::handler()
 {
-    //ctor
+    
 }
 handler::handler(utility::string_t url):m_listener(url)
 {
@@ -11,7 +13,10 @@ handler::handler(utility::string_t url):m_listener(url)
     m_listener.support(methods::POST, std::bind(&handler::handle_post, this, std::placeholders::_1));
     m_listener.support(methods::DEL, std::bind(&handler::handle_delete, this, std::placeholders::_1));
 
+    m_router.insert(PathFuncPair(U("/rest/ask"), std::bind(&handler::postForAsk, this, std::placeholders::_1)));
+    m_router.insert(PathFuncPair(U("/rest/cacl"), std::bind(&handler::postForCalc, this, std::placeholders::_1)));
 }
+
 handler::~handler()
 {
     //dtor
@@ -37,13 +42,16 @@ void handler::handle_get(http_request message)
 {
     ucout <<  message.to_string() << endl;
 
-    auto paths = http::uri::split_path(http::uri::decode(message.relative_uri().path()));
-
-    message.relative_uri().path();
-	//Dbms* d  = new Dbms();
-    //d->connect();
-
-      concurrency::streams::fstream::open_istream(U("static/index.html"), std::ios::in).then([=](concurrency::streams::istream is)
+    utility::string_t reqSrc;
+    reqSrc.append(m_staticResourcePath);
+    reqSrc.append(http::uri::decode(message.relative_uri().path()));
+    if (reqSrc[reqSrc.length()-1] == '/')
+    {
+        reqSrc.append(U("index.html"));
+    }
+    
+    concurrency::streams::fstream::open_istream(reqSrc, std::ios::in)
+    .then([=](concurrency::streams::istream is)
     {
         message.reply(status_codes::OK, is,  U("text/html"))
 		.then([](pplx::task<void> t)
@@ -52,21 +60,19 @@ void handler::handle_get(http_request message)
 				t.get();
 			}
 			catch(...){
-				//
 			}
-	});
+	    });
     }).then([=](pplx::task<void>t)
 	{
 		try{
 			t.get();
 		}
 		catch(...){
-			message.reply(status_codes::InternalError,U("INTERNAL ERROR "));
+			message.reply(status_codes::InternalError,U("<h1>500 INTERNAL ERROR</h1>"), U("text/html"));
+            ucout << "Failed to reply with file [" << reqSrc << "]!" << endl;
 		}
 	});
-
     return;
-
 };
 
 //
@@ -75,10 +81,18 @@ void handler::handle_get(http_request message)
 void handler::handle_post(http_request message)
 {
     ucout <<  message.to_string() << endl;
+    auto path = message.request_uri().to_string();
 
-
-     message.reply(status_codes::OK,message.to_string());
-    return ;
+    auto it = m_router.find(path);
+    if (it != m_router.end())
+    {
+        auto &func = it->second;
+        func(message);
+    }
+    else
+    {
+        message.reply(status_codes::NotFound, "REQUESTED URI NOT EXISTS IN SERVER.");
+    }
 };
 
 //
@@ -104,3 +118,39 @@ void handler::handle_put(http_request message)
      message.reply(status_codes::OK,rep);
     return;
 };
+
+
+
+
+//--------customed function for handler post request
+void handler::postForAsk(http_request req)
+{
+    req.extract_json()
+    .then([&req](json::value body) {
+        auto oBody = body.as_object();
+        auto mesAsk = oBody["mesAsk"].as_string();
+        auto asker = oBody["asker"].as_string();
+
+        auto mes = utility::string_t("Hello,").append(asker).append(".Your question is [").append(mesAsk).append("].");
+        return mes;
+    }).then([&req](utility::string_t mes){
+        json::value obj;
+        obj["mesReply"] = json::value::string(mes);
+        auto res = obj.serialize();
+        ucout << res << endl;
+        req.reply(status_codes::OK, res, U("application/json"));
+    }).then([&req](pplx::task<void> t){
+        try
+        {
+            t.wait();
+        }
+        catch(...)
+        {
+            req.reply(status_codes::InternalError, "PLEASE CHECK YOUR INPUT.");
+        }
+    });
+}
+
+void handler::postForCalc(http_request req)
+{
+}
