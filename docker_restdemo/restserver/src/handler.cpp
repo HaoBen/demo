@@ -1,4 +1,5 @@
 #include "handler.h"
+#include <unistd.h>
 
 typedef pair<utility::string_t, function<void(http_request)> > PathFuncPair;
 
@@ -14,7 +15,7 @@ handler::handler(utility::string_t url):m_listener(url)
     m_listener.support(methods::DEL, std::bind(&handler::handle_delete, this, std::placeholders::_1));
 
     m_router.insert(PathFuncPair(U("/rest/ask"), std::bind(&handler::postForAsk, this, std::placeholders::_1)));
-    m_router.insert(PathFuncPair(U("/rest/cacl"), std::bind(&handler::postForCalc, this, std::placeholders::_1)));
+    m_router.insert(PathFuncPair(U("/rest/calc"), std::bind(&handler::postForCalc, this, std::placeholders::_1)));
 }
 
 handler::~handler()
@@ -128,8 +129,24 @@ void handler::postForAsk(http_request req)
     req.extract_json()
     .then([&req](json::value body) {
         auto oBody = body.as_object();
-        auto mesAsk = oBody["mesAsk"].as_string();
-        auto asker = oBody["asker"].as_string();
+        utility::string_t mesAsk, asker;
+        if (oBody["mesAsk"].is_null())
+        {
+            mesAsk = U("");
+        }
+        else
+        {
+            mesAsk = oBody["mesAsk"].as_string();
+        }
+
+        if (oBody["asker"].is_null())
+        {
+            asker = U("");
+        }
+        else
+        {
+            asker = oBody["asker"].as_string();
+        }
 
         auto mes = utility::string_t("Hello,").append(asker).append(".Your question is [").append(mesAsk).append("].");
         return mes;
@@ -153,4 +170,39 @@ void handler::postForAsk(http_request req)
 
 void handler::postForCalc(http_request req)
 {
+    req.extract_json()
+    .then([&req](json::value body) {
+        auto oBody = body.as_object();
+        double left = oBody["left"].as_double();
+        double right = oBody["right"].as_double();
+        int opCode = oBody["opCode"].as_integer(); // 1+,2-,3*,4/
+
+        double calRes = 0;
+        switch(opCode)
+        {
+        case 1:
+            calRes = left+right;
+            break;
+        case 2:
+            calRes = left-right;
+            break;
+        case 3:
+            calRes = left*right;
+             break;
+        case 4:
+            calRes = left/right;
+            break;
+        default:
+            break;
+        }
+        return calRes;
+    }).then([&req](int calRes){
+        sleep(3);
+        ucout << &req << endl;
+        json::value res;
+        res["res"] = json::value::number(calRes);
+        res["message"] = json::value::string(U("OK"));
+        ucout << res.serialize() << endl;
+        req.reply(status_codes::OK, res.serialize(), U("application/json"));
+    });
 }
